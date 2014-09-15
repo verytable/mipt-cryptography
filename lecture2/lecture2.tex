@@ -1,0 +1,152 @@
+\documentclass[a4paper]{article}
+
+\usepackage{cmap}                   % поиск в PDF
+\usepackage[T2A]{fontenc}           % кодировка
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsthm}
+
+\title{Криптография, Лекция № 2}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{idea}{Idea}      
+      
+\begin{document}
+\maketitle
+
+\noindent Вспомним определения сильно односторонних функций:
+$$
+	\forall \{R_n\}\ \exists p(\cdot)\ \exists N\ \forall n > N\ Pr\{f(R_n(f(x))) = f(x)\} < 1 - \frac{1}{p(n)}
+$$ 
+$$
+	\exists p(\cdot)\ \forall \{R_n\}\ \exists N\ \forall n > N\ Pr\{f(R_n(f(x))) = f(x)\} < 1 - \frac{1}{p(n)}
+$$ 
+
+\noindent Из второго всегда следует первое.
+
+\noindent Отрицание второго:
+$$
+	\forall p(\cdot)\ \exists \{R_n\}\ \forall N\ \exists n > N\ Pr\{f(R_n(f(x))) = f(x)\} \ge 1 - \frac{1}{p(n)}
+$$ 
+
+\noindent Можно найти такую последовательность из отрицания выше:
+$$
+	\forall k\ \exists \{R_n^{(k)}\}\ \forall N\ \exists n > N\ Pr\{f(R_n(f(x))) = f(x)\} \ge 1 - \frac{1}{n^k}
+$$
+
+$$
+	R_{n_1^{(1)}} \colon Pr\{\cdots\} \ge 1 - \frac{1}{n_1}
+$$
+$$
+	R_{n_2^{(2)}} \colon n_2 > n_1, Pr\{\cdots\} \ge 1 - \frac{1}{n_2^2}
+$$
+\noindent И так далее.
+
+\noindent Из этого ряда вытекает следующее:
+$$
+	\exists \{R_{n}\}\ \forall k\ \forall N\ \exists n = max\{n_k, n_k > N\} > N Pr\{\cdots\} \ge 1 - \frac{1}{n^k}
+$$
+
+$$
+	\exists p(\cdot)\ \forall \{R_n\}\ \exists N\ \forall n > N\ Pr\{f(R_n(f(x))) = f(x)\} < 1 - \frac{1}{p(n)}
+$$
+
+$$
+	F(x_1, \ldots, x_N) = f(x_1)\ldots f(x_N)
+$$
+
+\begin{theorem}~\\
+	Если $N = n \cdot p(n)$, то $F$ - сильно односторонняя, то есть
+	$$
+		\forall q(\cdot)\ \forall\{T_n\}\ \exists N\ \forall n > N\ Pr\{F(T_n(F(x))) = F(x)\} < \frac{1}{q(n)}
+	$$
+\end{theorem}
+
+\begin{proof}~\\
+	Пусть 
+	$$
+		\exists q(\cdot)\ \exists \{T_n\}\ \forall N\ \exists n > N\ Pr\{F(T_n(F(x))) = F(x)\} \ge \frac{1}{q(n)}
+	$$
+	Построим $R_n$:
+	$M$ раз повторить процедуру:
+	\begin{itemize}
+		\item При всех $i$ от $1$ до $N$ выбрать случайные $x_1,\ldots, x_N$
+		\item Посчитать $T_n(f(x_1)\ldots f(x_{i - 1})y f(x_{i + 1})\ldots f(x_N))$
+		\item Проверить успешность обращения $y$.
+	\end{itemize}
+	
+	\noindent $S_i(x)$ - вероятность успешного обращения $f(x)$ на шаге $i$ внутреннего цикла.~\\
+	\noindent $S(x) = max\{S_1(x), \ldots, S_N(x) \}$ - нижняя оценка вероятности обращения на 1 шаге внешнего цикла.
+	Все $x$ разделим на две части по предикату $S(x) \ge \delta = \frac{1}{poly(n)}$.~\\
+	
+	\noindent Для первых, удовлетворяющих предикату, повторение $M = n \cdot \frac{1}{\delta}$ раз приведет к вероятности обращения $f(x)$ $\sim 1 - e^{-n}$~\\
+	\noindent Вероятность того, что обращение не сработает ни на одном шаге: $(1 - \delta)^M = (1 - \delta)^{n\cdot \frac{1}{\delta}} \sim e^{-n}$~\\
+	
+	\noindent Для вторых, трудных, докажем, что таких $x$ мало (например, $< \frac{1}{2p(n)}$)
+	
+	\noindent Вход $T_n \colon x_1\ldots x_N$ все $x_i$ легкие с вероятностью $(1 - \varepsilon)^N$, где $\varepsilon$ - доля трудных $x$.~\\
+	
+	\noindent $x_i$ трудный, остальные случайные. В этом случае условная вероятность обращения $< \delta$.~\\
+	
+	
+	\noindent Общая вероятность обращения $\le N\delta\varepsilon + (1 + \varepsilon)^N$ - что-то типа формулы включений-исключений.
+	Получим противоречие, если покажем, например, что $N\delta\varepsilon + (1 + \varepsilon)^N < \frac{1}{q(n)}$~\\
+	
+	\noindent Если $\varepsilon < \frac{1}{2p(n)}$, получим противоречие со слабой одностороностью $F$.~\\
+	
+	\noindent Если же $\varepsilon \ge \frac{1}{2p(n)}$, возьмем $\delta = \frac{1}{2np(n)q(n)}$. Получим противоречие с предположением, что $F$ не является сильно односторонней.
+	
+\end{proof}
+
+\noindent Часто в проложениях бывает так, что нельзя сделать так, чтобы функция была везде определена.
+	(Например, функция, определенная только на произведении двух больших чисел.) Часто бывает нужно выбрать
+	случайный элемент из области определения.
+
+\begin{definition}~\\
+	Пусть $\mu_n$ - случайная величина со значениями в $\{0, 1\}^{k(n)}$. Будем говорить, что
+	$\mu_n$ - полиномиально вычислимая, если существует полиномиальный вероятностный алгоритм с пустым
+	входом $S$ такой, что $\forall x \in \{0, 1\}^{k(n)}\ Pr\{S(\varepsilon) = x\} = Pr\{\mu_n = x\}$
+\end{definition}
+
+\begin{definition}~\\
+	Статистическое расстояние: $dist(\mu_n, \nu_n) = max_{T \subset \{0, 1\}^{k(n)}} |Pr\{\mu_n \ in T \} - Pr\{\nu_n \in T \}| = \sum_{x \ in \{0, 1\}^{k(n)}} \frac{1}{2}|Pr\{\mu_n = x \} - Pr\{\nu_n = x \}|$
+\end{definition}
+
+\begin{definition}~\\
+	$\mu_n$ доступна, если
+	$$
+		\exists \nu_n\ \forall p(\cdot)\ \exists N\ \forall n > N dist(\mu_n, \nu_n) < \frac{1}{p(n)}
+	$$
+	$\nu_n$ - полиномиально вычислима.
+\end{definition}
+
+\begin{definition}~\\
+	$f\colon D \rightarrow \{0, 1\}^n$ - частичная односторонняя функция есил:
+	\begin{itemize}
+		\item Равномерная случайная величина на $D$ доступна
+		\item $f$ вычислима за полиномиальное время
+		\item $\forall R_n\ \forall p(\cdot)\ \exists N\ \forall n > N\ Pr_{x \in D}\{R_n(f(x)) \in D, f(R_n(f(x))) = f(x)\} < \frac{1}{p(n)}$
+	\end{itemize}
+\end{definition}
+
+\noindent Предположительные частично односторонние функции:
+\begin{itemize}
+		\item Функция Рабина: $(x, y) \rightarrow (x^2\ mod\ y, y)$~\\
+			$y = p \cdot q$~\\
+			$p_n, q$ - простые вида $4k + 3$~\\
+			$x$ - квадратичный вычет.
+		\item Функция RSA: $(x, y, z) \rightarrow (x^z\ mod\ y, y, z)$ - извлечение корня степени $z$~\\
+			$y = p \cdot q$~\\
+			$x$ - вычет, взаимно простый с $y$~\\
+			$z$ - взаимно просто с $\phi(p\cdot q) = (p - 1)(q - 1)$
+		\item Дискретная экспонента $(x, y, z) \rightarrow (x, y, x^z)$ - логарифм по основанию~$x$.
+	\end{itemize}
+
+\end{document}

@@ -1,0 +1,147 @@
+\documentclass[a4paper]{article}
+
+\usepackage{cmap}                   % поиск в PDF
+\usepackage[T2A]{fontenc}           % кодировка
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsthm}
+
+\title{Криптография, Лекция № 1}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{idea}{Idea}      
+      
+\begin{document}
+\maketitle
+
+\begin{definition}~\\
+    Функция $f\colon \{0, 1\}^{k(n)} \rightarrow \{0, 1\}^{l(n)}$ называется сильно односторонней, если $f$ вычисляется за время $poly(n)$ и
+    $$
+        \forall p \forall\{Rn\}_{n = 1}^{\infty} \exists N \forall n > N Pr_{x \in \{0, 1\}^{k(n)}}\{f(Rn(f(x))) = f(x)\} < \frac{1}{p(n)}
+    $$
+    
+  \noindent $Rn$ - семейства схем полиномиального размера
+\end{definition}
+
+
+\begin{definition}~\\
+    Функция $f\colon \{0, 1\}^{k(n)} \rightarrow \{0, 1\}^{l(n)}$ называется слабо односторонней, если $f$ вычисляется за время $poly(n)$ и 
+    $$
+        \exists q \forall\{Rn\}_{n = 1}^{\infty} \exists N \forall n > N Pr_{x \in \{0, 1\}^{k(n)}}\{f(Rn(f(x))) = f(x)\} < 1 - \frac{1}{q(n)}
+        $$
+    
+  \noindent $Rn$ - семейства схем полиномиального размера
+\end{definition}
+
+
+\begin{remark}~\\
+    Сильно односторонняя функция является слабо односторонней. Достаточно взять $p = 2$
+\end{remark}
+
+
+\begin{claim}~\\
+    Если существует слабо одностороняя функция, то $P \ne NP$
+\end{claim}
+
+\begin{proof}~\\
+    $L = \{y \in \{0, 1\}^{l(n)} \colon \exists x \in \{0, 1\}^{k(n)} f(x) = y\} \in NP$
+    
+    \noindent Если $P = NP$, то соответсвующая задача поиска решается за полиномиальное время. А эта задача обращает $f(x)$.
+\end{proof}
+
+\begin{claim}~\\
+    Если $f$ - одностороння функция, то $h(x) = f(x)0\ldots0$ ($l(n)$ нулей) - односторонняя функция.
+\end{claim}
+
+\begin{proof}~\\
+    Дан $y$, хотим найти $x\colon f(x) = y$. Запишем $y$ дополненный $l(n)$ нулями, обратим $h$, получим $x$.
+\end{proof}
+
+\begin{claim}~\\
+    Если $f$ - одностороння функция, то $h(x) = f(x)f(x)$ (конкатенация) - односторонняя функция.
+\end{claim}
+
+\begin{proof}~\\
+    Дан $y$, хотим найти $x\colon f(x) = y$. Запишем $y$ два раза подряд, обратим $g$, получим $x$.
+\end{proof}
+
+\begin{definition}~\\
+    Функция $f\colon \{0, 1\}^{k(n)} \rightarrow \{0, 1\}^{l(n)}$ называется сильно односторонней в вероятностной схеме, если $f$ вычисляется за время $poly(n)$ и
+    $$
+        \forall p \forall\{Rn\}_{n = 1}^{\infty} \exists N \forall n > N Pr_{x \in \{0, 1\}^{k(n)}, r}\{f(Rn(f(x), r)) = f(x)\} < \frac{1}{p(n)}
+    $$
+    
+  \noindent $Rn$ - семейства схем полиномиального размера
+\end{definition}
+
+\begin{remark}~\\
+    Сильно односторонняя функция является сильно односторонней в вероятностной схеме и наоборот
+\end{remark}
+
+Примеры предположительно односторонних функций:
+\begin{enumerate}
+    \item Умножение (cлабо односторонняя функция)~\\
+    $f(x) = x \cdot y$~\\
+    $|x| = |y| = n$
+    \item SUBSET-SUM~\\
+    $(n_1,\ldots,n_k, s) \rightarrow (n_1,\ldots,n_k, N)$, $|s| = k$~\\
+    $N = \sum_{i\colon s_i = 1}n_i$
+\end{enumerate}
+
+\begin{claim}~\\
+    Если существует сильно односторонняя функция, то существует слабо одностороняя функция, не являющаяся сильно односторонней.
+\end{claim}
+
+\begin{proof}~\\
+    $g(x0) = f(x)0$~\\
+    $g(x1) = x1$~\\
+    Такая $g$ - слабо односторонняя, ибо если ее можно обратить с вероятностью $\frac{2}{3}$, то ее можно обратить в первом случае с вероятностью $\frac{1}{3}$.
+    Тогда и $f$ можно обратить с такой вероятностью, а значит, $f$ - не сильно односторонняя.
+\end{proof}
+
+\begin{theorem}~\\
+    Если существует слабо одностороняя функция, то существет сильно одностороняя функция.
+\end{theorem}
+
+\begin{idea}~\\
+    $F(x_1,\ldots,x_N) = f(x_1)\ldots f(x_N)$~\\
+    Пусть обратитель $F$ пытается обратить все компоненты по отдельности. Тогда
+    вероятность успеха $\le \left(1 - \frac{1}{q(n)}\right)^N = l^{-n}$
+\end{idea}
+
+\begin{proof}~\\
+    Нужно по рбратиелю $F$ построить обратитель $f$.~\\
+    $S(y)\colon$ запуск $R(y, f(x_2),\ldots,f(x_N))$, проверка успешности~\\
+    запуск $R(y, f(x_2),\ldots,f(x_N))$, проверка успешности~\\
+    запуск $R(y, f(x_2),\ldots,f(x_N))$, проверка успешности~\\
+    
+    
+    \noindent Достаточно доказать утверждение:
+    \begin{claim}~\\
+        Если $R$ успешен с вероятностью $\ge \frac{1}{p(n)}$, то~\\
+        $$
+            \forall q \exists m S \textup{успешен с вероятностью} \ge 1 - \frac{1}{q(n)}
+        $$
+    \end{claim}
+    
+    $$
+        S_1(x) = Pr_{x_2,\ldots,x_n}\{f(R_1(f(x), f(x_2),\ldots,f(x_N))) = f(x)\}
+    $$
+    
+    $$
+        S_i(x) = Pr_{x_1,\ldots,x_{i - 1}, x_{i + 1},\ldots,x_N}\{f(R_1(f(x_1),\ldots,f(x_{i - 1}), f(x), f(x_{i + 1}),\ldots,f(x_N))) = f(x)\}
+    $$
+    Вероятность успеша 1 шага $S \ge max\{S_1(x),\ldots,S_N(x)\}$~\\
+    \begin{idea}~\\
+        Если $max S_i(x) > \frac{1}{poly(n)}$, тогда за счет выбора $m$ можно повысить вероятность успеха до $1 - \frac{1}{q(n)}$ таких $x$, что $max S_i(x) < \frac{1}{poly(n)}$, мало.
+    \end{idea}
+\end{proof}
+
+\end{document}
