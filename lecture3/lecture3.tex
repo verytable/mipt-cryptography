@@ -1,0 +1,135 @@
+\documentclass[a4paper]{article}
+
+\usepackage{cmap}                   % поиск в PDF
+\usepackage[T2A]{fontenc}           % кодировка
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsthm}
+\usepackage{multirow}
+
+\title{Криптография, Лекция № 3}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{idea}{Idea}      
+\newtheorem{example}{Example} 
+      
+\begin{document}
+\maketitle
+
+\section{Генераторы псевдо-случайных чисел}
+
+\begin{definition}~\\
+	$\alpha_n$, $\beta_n$ вычислительно не отличимые семейства случайных величин, если
+	$$
+		\forall p(\cdot)\ \forall \{D_n\}\ \exists N\ \forall n > N\ |Pr\{D_n(\alpha_n) = 1\} - Pr\{D_n(\beta_n) = 1\}| < \frac{1}{p(n)}	
+	$$
+	где $p(\cdot)$ - полином, $D_n$ - схема полиномиального размера.
+\end{definition}
+
+\begin{lemma}~\\
+	\begin{enumerate}
+		\item Вычислительная неотличимость - отношение эквивалентности. (Сумма двух функций, которые стремятся к нулю быстрее любого полинома обладет тем же свойством).
+		\item $\alpha_n \sim \beta_n \Rightarrow \alpha_n \gamma_m \sim \beta_n \gamma_n$, $\gamma_n$ не зависит от $\alpha_n$ и $\beta_n$~\\
+		\begin{eqnarray*}
+			&& |Pr_{\alpha, \gamma}\{D_n(\alpha_n \gamma_n) = 1\} - Pr_{\beta, \gamma}\{D_n(\beta_n \gamma_n)| =      \nonumber \\
+   			& = & |E_{\gamma}(Pr_{\alpha}\{D_n(\alpha_n \gamma_n) = 1\} - Pr_{\beta}\{D_n(\beta_n \gamma_n) = 1\})| > \frac{1}{q(n)} \nonumber \\
+        \end{eqnarray*}
+		\item $\alpha_n \sim \beta_n \Rightarrow C_n(\alpha_n) \sim C_n(\beta_n)$, $C_n$ - схема полиномиального размера.~\\
+		
+		Если $D_n$ отличает $C_n(\alpha)$ от $C_n(\beta)$, то $D_n \circ C_n$ отличает $\alpha_n$ от $\beta_n$
+	\end{enumerate}
+\end{lemma}
+
+\begin{definition}~\\
+	$G_n \colon \{0, 1\}^{k(n)} \rightarrow \{0, 1\}^{l(n)}$ - \textbf{генератор псевдо-случайных чисел},
+	если случайные величины $G_n(U_{k(n)})$ и $G_n(U_{l(n)})$ вычислительно неотличимы то есть:
+	$$
+		\forall p(\cdot)\ \forall \{D_n\}\ \exists N\ \forall n > N\ |Pr\{D_n(\alpha_n) = 1\} - Pr\{D_n(\beta_n) = 1\}| < \frac{1}{p(n)}	
+	$$
+\end{definition}
+
+\begin{remark}~\\
+	\begin{itemize}
+		\item Важна именно вычислительная неотличимость. Заменить ее на статистическую неотличимость не получится.
+		\item $G_n$ - сильно одностороння функция.~\\	
+		Пусть $\ldots Pr\{G_n(R_n(G_n(x))) = G_n(x)\} > \varepsilon$.~\\
+		$D_n(y) = if(G_n(R_n(y)) = y)\ 1, else\ 0$
+	\end{itemize}
+\end{remark}
+
+\begin{definition}~\\
+	$\beta(x)$ - \textbf{Трудный бит} для $f$, если
+	$$
+		\forall p\ \forall \{C_n\}\ \exists N\ \forall n > N\ |Pr\{C_n(f(x)) = \beta(x)\} - \frac{1}{2}| < \frac{1}{p(n)}	
+	$$
+\end{definition}
+
+\begin{example}(Предположительный)~\\
+	Функция Рабина: $(x, y) \mapsto (x^2 mod y, y)$. Трудный бит - четность $x$. 
+\end{example}
+
+\noindent План доказательста существования генератора случайных битов, если известно, что существует одностороння функция:
+\begin{itemize}
+	\item Односторонняя перестановка $\mapsto$ одностороння перестановка с трудным битом.~\\
+	$g(x, y) = (f(x), y)$~\\
+	$\beta(x, y) = x \odot y = \oplus_{i = 1}^{n} x_i y_i$
+	\item Односторонняя перестановка с трудным битом $\mapsto$ генератор
+	\item Генератор($n \rightarrow n + 1$) $\mapsto$ Генератор($n \rightarrow p(n)$)
+\end{itemize}
+
+\begin{lemma}~\\
+	$\beta(x)$ - трудный бит для $f(x) \Leftrightarrow x \mapsto f(x)\beta(x)$ - генератор.
+\end{lemma}
+
+\begin{proof}~\\
+	$\Leftarrow$~\\
+	$\beta$ можно угадать $\Rightarrow$ $f(x)\beta(x)$ можно отличить от $y$.~\\
+	$D_n(y) = (C_n(y \mid_{1 \ldots n}) \leftrightarrow y_{n + 1})$~\\
+	$y$ случайное $\Rightarrow$ $D_n$ угадывает с вероятностью $\frac{1}{2}$.~\\
+	$y = f(x)\beta(x) \Rightarrow D_n$ угадает с вероятностью $\frac{1}{2} + \frac{1}{p(n)}$~\\
+	$\Rightarrow$~\\
+	$f(x)\beta(x)$ умеем отличать от $y$ $\Rightarrow$ можно предсказать $\beta(x)$ по $f(x)$.~\\
+	$y$ можно представить в виде $f(x)r$.
+	
+	
+	\begin{tabular}{cc|c|c|c|c|l}
+		\cline{3-4}
+		& & \multicolumn{2}{ c| }{$D(f(x)1)$} \\ \cline{3-4}
+		& & 0 & 1 \\ \cline{1-4}
+		\multicolumn{1}{ |c  }{\multirow{2}{*}{$D(f(x)0)$} } &
+		\multicolumn{1}{ |c| }{0} & random & 1 \\ \cline{2-4}
+		\multicolumn{1}{ |c  }{}                        &
+		\multicolumn{1}{ |c| }{1} & 0 & random \\ \cline{1-4}
+	\end{tabular}~\\
+	
+	\noindent Введем $p_0, p_1, q_0, q_1, r_0, r_1, s_0, s_1$ - вероятности
+	в соответствующих условиях того, что $\beta(x) = 0$ и $\beta(x) = 1$~\\
+	Например: $r_1 = Pr\{\beta(x) = 1,\ D(f(x)0) = 1,\ D(f(x)1) = 0\}$.~\\	
+	
+	$Pr\{C_n(f(x)) = \beta(x)\} = \frac{1}{2}(p_0 + p_1) + q_1 + r_0 + \frac{1}{2}(s_0 + s_1)$ \textcircled{=}~\\
+	
+	$Pr\{D(f(x)r) = 1\} = (s_0 + s_1) + \frac{1}{2}(r_0 + r_1) + \frac{1}{2}(q_0 + q_1)$~\\
+	
+	$Pr\{D(f(x)\beta(x)) = 1\} = (s_0 + s_1) + r_0 + q_1$~\\
+	
+	$\frac{1}{2}(r_0 - r_1) + \frac{1}{2}(q_1 - q_0) > \varepsilon$~\\
+	
+	\begin{eqnarray*}
+		& \textcircled{=} & \frac{1}{2}(p_0 + p_1) + \frac{1}{2}(q_1 + q_0) + \frac{1}{2}(r_0 + r_1) + \frac{1}{2}(r_0 - r_1) + \frac{1}{2}(s_0 + s_1) = \nonumber \\
+		& = & \frac{1}{2} + \frac{1}{2}(q_1 - q_0) + \frac{1}{2}(r_0 - r_1) > \frac{1}{2} + \varepsilon
+	\end{eqnarray*}		
+	
+\end{proof}
+
+\begin{idea} Последнего шага~\\
+	$x \mapsto g(x)h(x) \mapsto g(g(x))h(g(x))h(x) \mapsto g(g(g(x)))h(g(g(x)))h(g(x))h(x) \mapsto \ldots$
+\end{idea}
+
+\end{document}
