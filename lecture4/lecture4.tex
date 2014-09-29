@@ -1,0 +1,153 @@
+\documentclass[a4paper]{article}
+
+\usepackage{cmap}                   % поиск в PDF
+\usepackage[T2A]{fontenc}           % кодировка
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsthm}
+\usepackage{multirow}
+
+\title{Криптография, Лекция № 4}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{idea}{Idea}      
+\newtheorem{example}{Example} 
+      
+\begin{document}
+\maketitle
+
+\noindent Продолжение доказательства теоремы о существовании генератора псевдо-случайных
+чисел, если существует односторонняя перестановка.~\\
+
+\noindent Сперва построим генератор псевдо-случайных числе, отображающий $n$ битов в $p(n)$, имея
+генератор псевдо-случайных чисел $(n \mapsto n + 1)$.~\\
+
+\noindent По генератору $G(x) = g(x)h(x)$ построим $G'(x) = h(x)h(g(x))h(g(g(x)))\ldots$
+
+\begin{claim}~\\
+	Если $G(x)$ - генератор псевдо-случайных чисел, то $G'(x)$ - генератор псевдо-случайных чисел.
+\end{claim}
+
+\begin{proof}~\\
+	Метод гибридного аргумента:
+	$$
+		G_{k + 1}(x) = h(x)h(g(x))h(g(g(x)))\ldots h(g^k(x))g^{k + 1}(x)	
+	$$
+	$$
+		G_k(x, r_1) = r_1h(x)h(g(x))h(g(g(x)))\ldots h(g^{k - 1}(x))g^{k}(x)	
+	$$
+	$$
+		G_k(x, r_1, r_2) = r_1 r_2 h(x)h(g(x))h(g(g(x)))\ldots h(g^{k - 2}(x))g^{k - 1}(x)	
+	$$
+	$$
+		G_1(x, r) = r_1 r_2 \ldots r_{k + 1} x	
+	$$
+	$$
+		G_0(x, r) = r_1 r_2 \ldots r_{k} h(x)g(x)	
+	$$
+	$G_0$ - истинно случайные биты. $G_k$ - претендент на генератор.~\\
+	
+	\noindent Если $G_{k + 1} = G'$ - не генератор, то 
+	$$
+		\exists D\ \exists q(\cdot)\ \forall N\ \exists n > N\ |Pr_{x, r}\{D(G_0(x, r)) = 1\} - Pr_{x, r}\{D(G_k(x, r)) = 1\}| \ge \frac{1}{q(n)}	
+	$$
+	$$
+		\Rightarrow \exists q'\ \forall N\ \exists n > N\ \exists i |Pr_{x, r}\{D(G_i(x, r)) = 1\} - Pr_{x, r}\{D(G_{i + 1}(x, r)) = 1\}| \ge \frac{1}{q'(n)}
+	$$
+	Тогда $G$ - не генератор:~\\
+	отличили $$r_1r_2\ldots r_{k - i + 1}h(x)h(g(x))\ldots h(g^{i - 1}(x))g^i(x)$$~\\
+	от $$r_1r_2\ldots r_{k - i}h(x)h(g(x))\ldots h(g^{i}(x))g^{i + 1}(x)$$~\\
+	
+	\noindent Переобозначим: $y = g^i(x)$, $s = r_1\ldots r_{k - i}$,
+	$T(x) = h(x)\ldots h(g^{i - 1}(x))g^i(x)$.~\\
+	
+	\noindent В этих обозначения мы отличили $sr_{k - i + 1}T(x)$ от $sh(x)T(g(x))$.~\\
+	
+	\noindent Фиксируя $s$, отличили $rT(x)$ от $h(x)T(g(x))$.
+	$$
+		D'(x, r) = D(s r T(x))	
+	$$
+	$D'$ будет оличать $xr$ от $g(x)h(x)$. Что привододит к противоречию с тем, что $g(x)h(x)$ - генератор
+	псевдо-случайных чисел.
+\end{proof}
+
+\noindent Осталось по односторонней перестановке построить одностороннюю перестановку с трудным битом. Но сперва поговорим немного о кодах Адамара.
+
+\begin{definition}
+	Код Адамара $H\colon \{0, 1\}^n \rightarrow \{0, 1\}^{2^n}$.
+	$$
+		H(x_1, \ldots, x_n)	= (x_1y_1 + \ldots + x_ny_n)\vert_{(y_1, \ldots, y_n) \in \{0, 1\}^{n}}
+	$$
+\end{definition}
+
+\noindent Коды Адамара могут быть декодированы списком:~\\
+Если расстояние Хэминга $\rho_H(z, \bar{z}) \le \frac{1}{2} - \varepsilon$, то
+за время $poly(\frac{n}{\varepsilon})$ можно выдать полиномиальный список, содержащий прообраз $z$.
+$z, \bar{z} \in \{0, 1\}^{2^n}$; $z \in Im H$ ($z$ - кодовое слово $H$).~\\
+
+\begin{proof}(Существования декодирования)~\\
+	\begin{definition}~\\
+		Расстояние Хэмминга $\rho_H(t, t') = \frac{\#\{i\colon t_i \ne t_i'\}}{2^n}$
+	\end{definition}
+
+	\noindent К $\bar{z}$ произвольный доступ: по $j$ за константное время можно найти $\bar{z}_j$~\\
+
+	\noindent Без искажений достаточно запросить $n$ битов с номерами
+	$(1, 0, \ldots, 0), \ldots, (0, \ldots, 0, 1)$~\\
+
+	\noindent Обозначим $z(y)$ - соответствующий бит $z$.
+
+	\begin{claim}~\\
+		$z(y + r) = z(y) + z(r)$
+	\end{claim}
+
+	\noindent Из утверждения $z(y) = z(y + r) + z(r) = $ большинство из $\bar{z}(y + r) + z(r)$ 
+
+	\begin{idea}~\\
+		Выберем специальным образом попарно независимые $r_1, \ldots, r_s$; выберем $z_y$ как большинство
+		из $\bar{z}(y + r_i) + z(r_i)$
+	\end{idea}
+	
+	\noindent Выбор $r_1, \ldots, r_s$:~\\
+	
+	\noindent $A$ - матрица размера $(2^m - 1)\times m$, строки - ненулевые элементы $\{0, 1\}^m$.
+	Пусть $s = 2^m - 1$.~\\
+	
+	\begin{claim}~\\
+		$u$ - случайный вектор $m\times 1 \Rightarrow$ величины $Au$ попарно независимы.
+	\end{claim}
+	
+	\noindent Возьмем $u_1, \ldots, u_n$ - случайные векторы размера $m \times 1$.
+	$U$ - случайная матрица размера $m \times n$.~\\
+	
+	\noindent $R = (r_1, \ldots, r_s)^T = AU$, матрица рамера $(2^m - 1)\times n$.~\\
+	$$
+		r_i = A_iU = (A_{i_1}e_1 + \ldots + A_{i_m}e_m)U = 
+		A_{i_1}e_1U + \ldots + A_{i_m}e_mU = A_{i_1}\bar{U}_1 + \ldots + A_{i_m}\bar{U}_m
+	$$
+	$$
+		z(r_i) = A_{i_1}z(\bar{U}_1) + \ldots + A_{i_m}z(\bar{U}_m)	
+	$$
+	
+	\noindent То есть достаточно задать $z(\bar{U}_1),\ldots, z(\bar{U}_m)$ чтобы вычислить $z(r_i)$.
+	Но все эти $2^m$ вариантов можно перебрать. Для каждого варианта вычисляем $z(r_i)$ и имея $\bar{z}$
+	с произвольным доступом, вычисляем значения по большинству.~\\
+	
+	\noindent Еще раз конструкция: для фиксированного набора $z(\bar{u}_1), \ldots, z(\bar{u}_m)$
+	при $j = 1, \ldots, n$. $z(e_j)$ выбирается как большинство из $\bar{z}(e_j + r_i) + z(r_i)$~\\
+	$\xi_i$ - случайная величина равная $1$, если и только если $z(y) \ne \bar{z}(y + r_i) + z(r_i)$
+	$$
+		Pr\{\xi_i = 1\} \le \frac{1}{2} - \varepsilon	
+	$$
+	Нужно посчитать вероятность $Pr\{\frac{1}{s}(\xi_1 + \ldots + \xi_s) \le \frac{1}{2}\}$ для
+	попарно независимых $\xi_1, \ldots, \xi_s$
+\end{proof}
+
+\end{document}
