@@ -37,19 +37,23 @@
 	\begin{enumerate}
 		\item Вычислительная неотличимость - отношение эквивалентности. (Сумма двух функций, которые стремятся к нулю быстрее любого полинома обладет тем же свойством).
 		\item $\alpha_n \sim \beta_n \Rightarrow \alpha_n \gamma_m \sim \beta_n \gamma_n$, $\gamma_n$ не зависит от $\alpha_n$ и $\beta_n$~\\
+		
+		Пусть не выполнено условие в правой части, тогда:
 		\begin{eqnarray*}
-			&& |Pr_{\alpha, \gamma}\{D_n(\alpha_n \gamma_n) = 1\} - Pr_{\beta, \gamma}\{D_n(\beta_n \gamma_n)| =      \nonumber \\
+			&& |Pr_{\alpha, \gamma}\{D_n(\alpha_n \gamma_n) = 1\} - Pr_{\beta, \gamma}\{D_n(\beta_n \gamma_n) = 1\}| =      \nonumber \\
    			& = & |E_{\gamma}(Pr_{\alpha}\{D_n(\alpha_n \gamma_n) = 1\} - Pr_{\beta}\{D_n(\beta_n \gamma_n) = 1\})| > \frac{1}{q(n)} \nonumber \\
         \end{eqnarray*}
 		\item $\alpha_n \sim \beta_n \Rightarrow C_n(\alpha_n) \sim C_n(\beta_n)$, $C_n$ - схема полиномиального размера.~\\
 		
-		Если $D_n$ отличает $C_n(\alpha)$ от $C_n(\beta)$, то $D_n \circ C_n$ отличает $\alpha_n$ от $\beta_n$
+		Пусть не выполнено условие в правой части, тогда:
+		Если $D_n$ отличает $C_n(\alpha)$ от $C_n(\beta)$,
+		то $D_n \circ C_n$ отличает $\alpha_n$ от $\beta_n$.
 	\end{enumerate}
 \end{lemma}
 
 \begin{definition}~\\
 	$G_n \colon \{0, 1\}^{k(n)} \rightarrow \{0, 1\}^{l(n)}$ - \textbf{генератор псевдо-случайных чисел},
-	если случайные величины $G_n(U_{k(n)})$ и $G_n(U_{l(n)})$ вычислительно неотличимы то есть:
+	если случайные величины $G_n(U_{k(n)})$ и $U_{l(n)}$ вычислительно неотличимы то есть:
 	$$
 		\forall p(\cdot)\ \forall \{D_n\}\ \exists N\ \forall n > N\ |Pr\{D_n(\alpha_n) = 1\} - Pr\{D_n(\beta_n) = 1\}| < \frac{1}{p(n)}	
 	$$
@@ -60,7 +64,13 @@
 		\item Важна именно вычислительная неотличимость. Заменить ее на статистическую неотличимость не получится.
 		\item $G_n$ - сильно одностороння функция.~\\	
 		Пусть $\ldots Pr\{G_n(R_n(G_n(x))) = G_n(x)\} > \varepsilon$.~\\
-		$D_n(y) = if(G_n(R_n(y)) = y)\ 1, else\ 0$
+		\begin{equation*}
+			D_n(y) =
+ 				\begin{cases}
+   					1 &G_n(К_n(y)) = y\\
+   					0 &\text{иначе}
+ 				\end{cases}
+		\end{equation*}
 	\end{itemize}
 \end{remark}
 
@@ -72,7 +82,7 @@
 \end{definition}
 
 \begin{example}(Предположительный)~\\
-	Функция Рабина: $(x, y) \mapsto (x^2 mod y, y)$. Трудный бит - четность $x$. 
+	Функция Рабина: $(x,\ y) \mapsto (x^2\ mod\ y,\ y)$. Трудный бит - четность $x$. 
 \end{example}
 
 \noindent План доказательста существования генератора случайных битов, если известно, что существует одностороння функция:
