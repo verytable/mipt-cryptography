@@ -1,0 +1,164 @@
+\documentclass[a4paper]{article}
+
+\usepackage{cmap}                   % поиск в PDF
+\usepackage[T2A]{fontenc}           % кодировка
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsthm}
+\usepackage{multirow}
+
+\title{Криптография, Лекция № 7}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{idea}{Idea}     
+\newtheorem{example}{Example} 
+      
+\begin{document}
+\maketitle
+
+\section{Привязка к биту (bit commitment)}
+
+\noindent Немножко говорили об этом в курсе сложностей вычислений.
+Для начала нужно определить требования. Неформально: во-первых, нужно,
+чтобы нельзя было подменить бит (завешенный шторкой).
+Во-вторых, шторка не прозрачная - это сообщение, и по нему ничего нельзя понять про бит.
+
+\subsection{Неинтерактивный протокол}
+
+\begin{definition}~\\
+	Неинтерактивный протокол - пара ($S$, $R$). $S$, $R$ - вероятностные
+	полиномиальные алгоритмы. $R$ может быть и детерминированным при условии,
+	что $S$ - полиномиальный в среднем. $S$ получает бит; при помощи этого бита делает две вещи:
+	$c$ - привязку и $k$ - ключ.
+	$$
+		S\colon \sigma \mapsto c, k	
+	$$
+	$$
+		R\colon c, k \mapsto \{0, 1, \perp\}	
+	$$
+	Требования:
+	\begin{enumerate}
+		\item $R(c_{\sigma}, k_{\sigma}) = \sigma$ (в вероятностном случае вероятсность стремится
+			быстрее любого полинома). Это требование в интересах получателя.
+		\item $R(c_{\sigma}, k^*) \in \{\sigma, \perp\}$ - так же требование получателя.
+		\item $c_0$ и $c_1$ - вычислительно не отличимы. (Из первых двух требований следует,
+			что $c_0$ и $c_1$ должны принимать значения из разных множеств).
+	\end{enumerate}
+\end{definition}
+
+\noindent Конструкция на базе односторонеей перестановки. Если есть одностороняя перестановка,
+то можно построить перестановку с трудным битом. Пусть $g$ - односторонняя перестановка, а $h$ -
+трудный бит. Тогда:
+$$
+	c_{\sigma} = (\sigma \oplus h(x), g(x))
+$$
+$$
+	k_{\sigma} = x
+$$
+Из-за того, что $h$ - трудный бит, $(h(x), g(x))$ вычислительно не отличимо от $(r, g(x))$,
+то $(\sigma\oplus h(x), g(x))$ вычислительно не отличимо от $(\sigma \oplus r, g(x))$, что
+не отличимо от $(r, g(x))$. Отсюда следует $c_0$ вычислительно не отличимо от~$c_1$.~\\
+
+$$
+	R((b, y), k) = 
+	\begin{cases}
+   		b \oplus h(k) & \text{при } g(k) = y \\
+   		\perp         & \text{при } g(k) \ne y
+  	\end{cases}
+$$
+$g$ - перестановка, следовательно $g(k) \ne g(k')$ при $k \ne k'$.
+
+
+\subsection{Интерактивный протокол}
+
+В предыдущем подходе получатель играл пассивную роль.
+Построем протокол в котором он будет что-то делать.~\\
+
+\begin{definition}~\\
+	Интерактивный протокол - 3 алгоритма: $R$, $S$, $T$. $R$, $S$ - вероятностные полиномиальные
+	алгоритмы. $T$ - детерминированный полиномиальный алгоритм, котороый получает
+	протокол общения и должен сказать, что же там было запечатано. Он возвращает
+	$0, 1$ либо ошибки $\perp_R, \perp_S$.~\\
+
+	2 фазы протокола: 
+	\begin{enumerate}
+		\item Привязка.
+			$<\mkern-6mu R, S(\sigma) \mkern-6mu>$ - протокол общения $R$ и $S$.
+		\item Раскрытие. $S$ посылает свои биты $S$.
+	\end{enumerate}~\\
+	
+	Требования:
+	\begin{enumerate}
+		\item $T(<\mkern-6mu R, S(\sigma) \mkern-6mu>, S) = \sigma$ - требование корректности.
+		\item $T(<\mkern-6mu R^*, S(\sigma) \mkern-6mu>, s) \in \{\sigma, \perp_R\}$ - усиленная корректность.
+			(Жульничующий $R$ не может заставить $S$ привязаться к другому биту).
+		\item $\forall S^*\ \exists \sigma^*\ \forall s^*\ T(<\mkern-6mu R, S^* \mkern-6mu>, S^*) \in \{\sigma^*, \perp_S\}$ - требование надежности.
+		\item $<\mkern-6mu R^*, S(0) \mkern-6mu>$ и $<\mkern-6mu R^*, S(1) \mkern-6mu>$ вычислительно не отличимы. (До раскрытия R ничего не узнает о бите, то есть все, что он увидит будет вычислительно неотличимо друг от друга.)
+	\end{enumerate}
+\end{definition}
+
+\noindent Конструкция на базе генератора $G\colon \{0, 1\}^{n} \mapsto \{0, 1\}^{3n}$:
+$$
+	S \xleftarrow{r\in \{0, 1\}^{3n}} R,\ \text{r - случайное}
+$$
+$S$ выбирает случайное $s \in \{0, 1\}^n$ 
+$$
+	S \longrightarrow R
+$$
+$T$ получает $q$ - сообщение $R$, $m$ - сообщение $S$, $s$ - случайные биты $S$.
+$$
+	T(q, m, s) =
+	\begin{cases}
+   		0       & \text{при   } m \oplus G(s) = 0^{3n} \\
+   		1       & \text{при   } m \oplus G(s) = q \\
+   		\perp_S & \text{иначе}
+  	\end{cases}
+$$
+Вычислительная неотличимость: $(q, G(s)) \sim (q, t) \sim (q, t \oplus q) \sim (q, G(s) \oplus q)$,
+где $t$ - случайное, длины $3n$.~\\
+
+\noindent Надежность - выполнена с вероятностью (по $r \in \{0, 1\}^{3n}$) не меньше $1 - \frac{1}{2^n}$.
+Покажем это рассмотрев неоднозначное раскрытие:~\\
+$\exists s_1\ m \oplus G(s_1) = 0^{3n}$ и $\exists s_2\ m \oplus G(s_2) = r$.~\\
+При выполнении обоих условий $\exists s_1, s_2\ G(s_1) \oplus G(s_2) = r$.
+Вероятность этого не превосходит $\frac{2^{2n}}{2^{3n}} = 2^{-n}$.
+
+\subsection{Интерактивное получение бита}
+
+\noindent 3 алгоритма: $A$, $B$, $J$. Первые два - детерминированные полиномиальные, последний - 
+детерминированный. $J\colon <\mkern-6mu A, B \mkern-6mu>\ \mapsto \{a, b\}$.
+$$
+	\forall B^*\ \forall p\ \exists N\ \forall n > N\ Pr\{J(<\mkern-6mu A, B^* \mkern-6mu>) = a\} \ge \frac{1}{2} - \frac{1}{p(n)}
+$$
+$$
+	\forall A^*\ \forall p\ \exists N\ \forall n > N\ Pr\{J(<\mkern-6mu A^*, B \mkern-6mu>) = a\} \ge \frac{1}{2} - \frac{1}{p(n)}
+$$
+$\sigma \in \{0, 1\}$ - случайный бит.
+$$
+	A \xrightarrow{c_{\sigma}} R,\ \text{r - случайное}
+$$
+$B$ выбирает случайное $\tau \in \{0, 1\}$.
+$$
+	A \xleftarrow{\tau} B
+$$
+$$
+	A \xrightarrow{k_{\sigma}} B
+$$
+$$
+	J(c, \tau, k) =
+	\begin{cases}
+   		a       & \text{при   } \tau \oplus R(c, k) = 0 \\
+   		b       & \text{при   } \tau \oplus R(c, k) = 1 \\
+   			    & \text{при   } R(c, k) = 1
+  	\end{cases}
+$$
+Если бы не было вычислительных ограничений, то выйграл бы $B$.
+
+\end{document}
