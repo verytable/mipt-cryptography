@@ -1,0 +1,80 @@
+\documentclass[a4paper]{article}
+
+\usepackage{cmap}                   % поиск в PDF
+\usepackage[T2A]{fontenc}           % кодировка
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath,amsthm}
+\usepackage{multirow}
+
+\title{Криптография, Лекция № 13}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{idea}{Idea}     
+\newtheorem{example}{Example} 
+      
+\begin{document}
+\maketitle
+
+\noindent Продолжая тему прошлой лекции сегодня поговорим об общем методе превращающем пртокол, надежный в 
+получестной модели в протокол, надежный в общей модели. ~\\
+
+\noindent Архитектура состоит из трех фаз:
+\begin{enumerate}
+	\item Привязка ко входу (что-то такое отправить, после чего нельзя подменить вход)
+	\item Генерация общих случайных битов
+	\item Симуляция протокола из получестной модели
+		(ключевой элемент - доказательства с нулевым разглашением)
+\end{enumerate}
+
+\noindent Схемы привязки ($\rightarrow$ подбрасывание монетки по телефону)
+$\rightarrow$ ZKP ( $\rightarrow$ передача занчения функции,
+когда принимающая сторона знает хеш $(\alpha, h(\alpha)) \mapsto (\varepsilon, f(\alpha))$ ) $\rightarrow$
+ZKPoK $\rightarrow$ передача значения функции. Существует еще обобщенное
+подбрасывание монетки, авторизованные вычисления, привязка ко входу. Из этого 
+всего получается итоговый протокол (здесь должна быть схема).~\\
+
+\noindent ZKP для языка $\{(u, v): \exists \alpha\ h(\alpha) = u, f(\alpha) = v\}$~\\
+\noindent Передача значения: $(\alpha, 1^{|\alpha|}) \mapsto (\varepsilon, f(\alpha))$.~\\
+\noindent Авторизованные вычисления:
+$(\alpha, \beta) \mapsto if (\beta == h(\alpha))\quad (\varepsilon, f(\alpha))\quad else\quad (\varepsilon, (h(\alpha), f(\alpha)))$~\\
+
+\subsection{Протокол}
+
+\begin{enumerate}
+	\item Первая сторона выбирает случайное $r' \in \{0, 1\}^n, s \in \{0, 1\}^{n^2}$
+	\item При помощи протокола передачи образа передается привязка $c_s(r')$
+	\item Обычным образом выбирается общее случайное $r''$.
+	\item Итоговое $r = r' \oplus r''$
+	\item Использутеся протокол авторизованных вычислений для $\alpha = (s, r', r'')$,
+		$\beta = h(\alpha) = (c_s(r'), r'')$, $f(\alpha) = g(r' \oplus r'')$ 
+\end{enumerate}
+
+\noindent Если все по честному, то протокол работает правильно. Что может плохого сделать
+первая сторона? Может выбирать $r'$ не случайно, но ей все-равно придется привязаться, и
+она не сможет потом его поменять, тогда $r''$ будет по честному случайным и, следовательно, 
+$r$ будет по честному случайным.~\\
+
+\noindent Привязка ко входу: $(x, 1^{|x|}) \mapsto (r, c_r(x))$, где $r$ случайное из $\{0, 1\}^n$.~\\
+
+\noindent Считаем, что $n = |x|$.
+
+\begin{enumerate}
+	\item $S$ выбирает случайное $r' \in \{0, 1\}^{n^2}$
+	\item Протокол передачи значения: посылает привязку к $x$ - $c_{r'}(x)$
+	\item При помощи обобщенного подбрасывания монетки $S$ получает $(r, r'')$, а $R$
+		получает $c_{r''}(r)$. Здесь $r \in \{0, 1\}^{n^2}$, $r'' \in \{0, 1\}^{n^3}$
+	\item Авторизованные вычисления, где $\alpha = (x, r, r', r'')$,
+		$\beta = h(\alpha) = (c_{r'}(x), c_{r''}(x))$, $f(\alpha) = c_r(x)$
+\end{enumerate}
+
+\noindent Такая многоступенчатая схема нужна для невозможности подменить $x$ и $r$.~\\
+
+\end{document}
